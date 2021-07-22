@@ -141,7 +141,11 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(kitti_odom_node
   src/kitti_odom_node.cpp
-  )
+)
+
+add_executable(mini_cheetah_node
+  src/mini_cheetah_node.cpp
+)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -155,6 +159,11 @@ add_executable(kitti_odom_node
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(kitti_odom_node
+   ${catkin_LIBRARIES}
+   ${OpenCV_LIBRARIES}
+)
+
+target_link_libraries(mini_cheetah_node
    ${catkin_LIBRARIES}
    ${OpenCV_LIBRARIES}
 )
