@@ -15,25 +15,33 @@ class MiniCheetahData{
   public:
     MiniCheetahData(ros::NodeHandle& nh) : nh_(nh), scan_id_(0) {
       color_image_subscriber_ = nh_.subscribe("/camera/color/image_raw", 1, &MiniCheetahData::image_callback, this);
-      color_camera_pose_publisher_ = nh_.advertise<geometry_msgs::PoseWithCovarianceStamped>("color_camera_pose", 1);
+      color_camera_pose_publisher_ = nh_.advertise<geometry_msgs::PoseWithCovarianceStamped>("/color_camera_pose", 1);
     }
 
     void image_callback(const sensor_msgs::Image::ConstPtr& image_msg) {
       ros::Time stamp = image_msg->header.stamp;
-      Eigen::Matrix4d color_camera_pose = color_camera_poses_[scan_id_];
+      Eigen::Matrix4d camera_pose = color_camera_poses_[scan_id_];
+      Eigen::Matrix4d init_trans_to_ground;
+      init_trans_to_ground << 1, 0, 0, 0,
+                              0, 0, 1, 0,
+                              0,-1, 0, 1,
+                              0, 0, 0, 1;
+      Eigen::Matrix4d color_camera_pose = init_trans_to_ground * camera_pose;
+
+
       tf::Transform tf_pose;
       Eigen::Affine3d eigen_affine_pose(color_camera_pose);
       tf::transformEigenToTF(eigen_affine_pose, tf_pose);
 
       // publish tf and pose
-      br_.sendTransform(tf::StampedTransform(tf_pose, stamp, "map", "camera_depth_optical_frame"));
+      br_.sendTransform(tf::StampedTransform(tf_pose, stamp, "map", "camera_color_optical_frame"));
       publish_pose_cov(eigen_affine_pose, stamp);
       scan_id_++;
     }
 
     void publish_pose_cov(Eigen::Affine3d pose, ros::Time t) {
       geometry_msgs::PoseWithCovarianceStamped pose_msg;
-      pose_msg.header.frame_id = "camera_depth_optical_frame";
+      pose_msg.header.frame_id = "camera_color_optical_frame";
       pose_msg.header.stamp = t;
 
       // set pose

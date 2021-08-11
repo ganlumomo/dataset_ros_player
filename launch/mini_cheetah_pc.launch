@@ -1,14 +1,27 @@
-<!--
-  This launch file is for ROS package depth_image_proc.
-  More info: http://wiki.ros.org/depth_image_proc/
--->
-
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <launch>
-  <node pkg="nodelet" type="nodelet" name="nodelet_manager" args="manager" />
 
+  <!-- Publish tf and pose msg read from file -->
+  <node pkg="dataset_ros_player" type="mini_cheetah_node" name="mini_cheetah_node" />
+  
+  <!-- Convert depth image to point cloud -->
+  <node pkg="nodelet" type="nodelet" name="nodelet_manager" args="manager" output="screen" />
   <node pkg="nodelet" type="nodelet" name="nodelet1" args="load depth_image_proc/point_cloud_xyz nodelet_manager">
-    <remap from="camera_info" to="/camera/depth/camera_info"/>
-    <remap from="image_rect" to="/camera/depth/image_rect_raw"/>
-    <remap from="points" to="/camera/depth/points"/>
+    <remap from="camera_info" to="/camera/aligned_depth_to_color/camera_info" />
+    <remap from="image_rect" to="/camera/aligned_depth_to_color/image_raw" />
+    <remap from="points" to="/camera/aligned_depth_to_color/points" />
   </node>
+  <!--
+  <node pkg="nodelet" type="nodelet" name="nodelet2" args="load pcl/PassThrough nodelet_manager">
+    <remap from="~input" to="points" />
+    <remap from="~output" to="/camera/aligned_depth_to_color/points" />
+    <rosparam>
+      filter_field_name: z
+      filter_limit_min: 0.01
+      filter_limit_max: 5.0
+      filter_limit_negative: False
+    </rosparam>
+  </node>
+  -->
+
 </launch>
