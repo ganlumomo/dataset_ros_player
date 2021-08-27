@@ -6,7 +6,9 @@ int main(int argc, char **argv) {
   ros::NodeHandle nh("~");
 
   MiniCheetahData mini_cheetah_data(nh);
-  mini_cheetah_data.read_color_camera_poses("/media/ganlu/Samsung_T5/0000_mini-cheetah/2021-05-29_Forest_Sidewalk_Rock_Data/rgbd_orbslam_trajectory_MAir_to_forest_0-170.txt");
+  std::string pose_file;
+  nh.getParam("/mini_cheetah_node/pose_file", pose_file);
+  mini_cheetah_data.read_color_camera_poses_tum(pose_file);
   
   ros::spin();
 

@@ -2,7 +2,10 @@
 <launch>
 
   <!-- Publish tf and pose msg read from file -->
-  <node pkg="dataset_ros_player" type="mini_cheetah_node" name="mini_cheetah_node" />
+  <node pkg="dataset_ros_player" type="mini_cheetah_node" name="mini_cheetah_node" output="screen">
+    <!--<param name="pose_file" value="/media/ganlu/Samsung_T5/0000_mini-cheetah/2021-05-29_Forest_Sidewalk_Rock_Data/2021-05-29-00-35-37/rgbd_orbslam_trajectory_MAir_to_forest_0-170_tum.txt" /> -->
+    <param name="pose_file" value="/media/ganlu/Samsung_T5/0000_mini-cheetah/2021-05-29_Forest_Sidewalk_Rock_Data/2021-05-29-00-35-37/rgbd_orbslam_trajectory_forest_tum.txt" />
+  </node>
   
   <!-- Convert depth image to point cloud -->
   <node pkg="nodelet" type="nodelet" name="nodelet_manager" args="manager" output="screen" />

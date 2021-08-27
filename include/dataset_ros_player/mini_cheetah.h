@@ -11,6 +11,9 @@
 
 #include <Eigen/Geometry>
 
+// sjy add map stl
+#include <map>
+
 class MiniCheetahData{
   public:
     MiniCheetahData(ros::NodeHandle& nh) : nh_(nh), scan_id_(0) {
@@ -20,14 +23,26 @@ class MiniCheetahData{
 
     void image_callback(const sensor_msgs::Image::ConstPtr& image_msg) {
       ros::Time stamp = image_msg->header.stamp;
-      Eigen::Matrix4d camera_pose = color_camera_poses_[scan_id_];
+      
+      // If read_color_camera_poses without timestamp
+      //Eigen::Matrix4d camera_pose = color_camera_poses_[scan_id_];
+
+      // sjy edit
+      // If read_color_camera_poses_tum with timestamp
+      long long int image_ts = stamp.toSec() * 1e+3;
+      std::map<long long int, Eigen::Matrix4d>::iterator it;
+      it = camera_pose_map_.find(image_ts);
+      if (it == camera_pose_map_.end()) {
+        return;
+      }
+      Eigen::Matrix4d camera_pose = it->second;
+      
       Eigen::Matrix4d init_trans_to_ground;
       init_trans_to_ground << 1, 0, 0, 0,
                               0, 0, 1, 0,
                               0,-1, 0, 1,
                               0, 0, 0, 1;
       Eigen::Matrix4d color_camera_pose = init_trans_to_ground * camera_pose;
-
 
       tf::Transform tf_pose;
       Eigen::Affine3d eigen_affine_pose(color_camera_pose);
@@ -114,6 +129,40 @@ class MiniCheetahData{
       }
     }
 
+    //sjy todo
+    bool read_color_camera_poses_tum(const std::string pose_name) {
+      long long int ts;
+      double temp_ts;
+      float tx, ty, tz;
+      float qx, qy, qz, qw;
+      // std::cout << pose_name << std::endl;
+      if (std::ifstream(pose_name)) {
+        std::ifstream fPoses;
+        fPoses.open(pose_name.c_str());
+        while (!fPoses.eof()) {
+          std::string s;
+          std::getline(fPoses, s);
+          if (!s.empty()) {
+            std::stringstream ss;
+            ss << s;
+            Eigen::Matrix4d t_matrix = Eigen::Matrix4d::Identity();
+            ss >> temp_ts >> tx >> ty >> tz >> qx >> qy >> qz >> qw;
+            t_matrix << 1.0f - 2.0f*qy*qy - 2.0f*qz*qz, 2.0f*qx*qy - 2.0f*qz*qw, 2.0f*qx*qz + 2.0f*qy*qw, tx,
+                        2.0f*qx*qy + 2.0f*qz*qw, 1.0f - 2.0f*qx*qx - 2.0f*qz*qz, 2.0f*qy*qz - 2.0f*qx*qw, ty,
+                        2.0f*qx*qz - 2.0f*qy*qw, 2.0f*qy*qz + 2.0f*qx*qw, 1.0f - 2.0f*qx*qx - 2.0f*qy*qy, tz,
+                        0.0f, 0.0f, 0.0f, 1.0f;
+            ts = temp_ts * 1e+3;
+            camera_pose_map_.insert(std::pair<long long int, Eigen::Matrix4d>(ts, t_matrix));
+          }
+        }
+        fPoses.close();
+        return true;
+        } else {
+         ROS_ERROR_STREAM("Cannot open pose file " << pose_name);
+         return false;
+      }
+    }
+
   private:
     int scan_id_;
     std::vector<Eigen::Matrix4d> color_camera_poses_;
@@ -122,4 +171,6 @@ class MiniCheetahData{
     ros::Subscriber color_image_subscriber_;
     ros::Publisher color_camera_pose_publisher_;
     tf::TransformBroadcaster br_;
+
+    std::map<long long int, Eigen::Matrix4d> camera_pose_map_;
 };
