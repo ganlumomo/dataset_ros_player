@@ -74,7 +74,8 @@ class KittiOdomData{
 
         // Read left color image
         std::string left_color_image_name = left_color_image_dir + std::string(scan_id_c) + ".png";
-        cv::Mat left_color_image = cv::imread(left_color_image_name, CV_LOAD_IMAGE_UNCHANGED);
+        //cv::Mat left_color_image = cv::imread(left_color_image_name, CV_LOAD_IMAGE_UNCHANGED);
+	cv::Mat left_color_image = cv::imread(left_color_image_name, cv::IMREAD_UNCHANGED);
         cv_bridge::CvImage left_color_msg;
         left_color_msg.encoding = sensor_msgs::image_encodings::RGB8;
         left_color_msg.image = left_color_image;
@@ -82,7 +83,8 @@ class KittiOdomData{
         
         // Read depth image
         std::string depth_image_name = depth_image_dir + std::string(scan_id_c) + ".png";
-        cv::Mat depth_image = cv::imread(depth_image_name, CV_LOAD_IMAGE_ANYDEPTH);
+        //cv::Mat depth_image = cv::imread(depth_image_name, CV_LOAD_IMAGE_ANYDEPTH);
+	cv::Mat depth_image = cv::imread(depth_image_name, cv::IMREAD_ANYDEPTH);
         cv_bridge::CvImage depth_msg;
         depth_msg.encoding = sensor_msgs::image_encodings::TYPE_16UC1;
         depth_msg.image = depth_image;
