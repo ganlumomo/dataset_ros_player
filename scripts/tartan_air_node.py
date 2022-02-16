@@ -45,7 +45,7 @@ class TartanAirData:
 
         # define msg publishers
         self.pc2_publisher = rospy.Publisher("points", PointCloud2, queue_size = 1)
-        #self.pc2_global_publisher = rospy.Publisher("points_global", PointCloud2, queue_size = 1)
+        self.pc2_global_publisher = rospy.Publisher("points_global", PointCloud2, queue_size = 1)
         self.pose_publisher = rospy.Publisher("pose", PoseWithCovarianceStamped, queue_size = 1)
         self.path_publisher = rospy.Publisher("path", Path, queue_size = 1)
         self.left_color_image_publisher = rospy.Publisher("left_color_image", Image, queue_size = 1)
@@ -54,7 +54,7 @@ class TartanAirData:
         # run node
         rospy.init_node('tartan_air_node', anonymous = True)
         #rospy.Rate(30)
-        seq_dir ="/media/ganlu/Samsung_T5/000_tro2020/tartanair-release1/abandonedfactory/Easy/P002/"
+        seq_dir ="/media/ganlu/Samsung_T5/000_tro2020/tartanair-release1/neighborhood/Easy/P001/"
         left_camera_pose_file = seq_dir + "pose_left.txt"
         self.read_left_camera_poses(left_camera_pose_file)
         self.depth_left_dir = seq_dir + "depth_left/"
@@ -102,7 +102,7 @@ class TartanAirData:
             #print(pc2)
 
             # publish points in map
-            '''transform = TransformStamped()
+            transform = TransformStamped()
             #rotation_inv = Rotation.from_quat([self.left_camera_poses[scan_id][3], self.left_camera_poses[scan_id][4], self.left_camera_poses[scan_id][5], self.left_camera_poses[scan_id][6]]  ).inv()
             #q_inv = rotation_inv.as_quat()
             #trans = np.array([self.left_camera_poses[scan_id][i] for i in range(3)])
@@ -118,9 +118,9 @@ class TartanAirData:
             transform.transform.rotation.w = self.left_camera_poses[scan_id][6]
             pc2_global = tf2_sensor_msgs.do_transform_cloud(pc2, transform)
             pc2_global.header.frame_id = "map"
-            print(self.left_camera_poses[scan_id][0], self.left_camera_poses[scan_id][1], self.left_camera_poses[scan_id][2],
-                    self.left_camera_poses[scan_id][3], self.left_camera_poses[scan_id][4], self.left_camera_poses[scan_id][5],
-                    self.left_camera_poses[scan_id][6])'''
+            #print(self.left_camera_poses[scan_id][0], self.left_camera_poses[scan_id][1], self.left_camera_poses[scan_id][2],
+            #        self.left_camera_poses[scan_id][3], self.left_camera_poses[scan_id][4], self.left_camera_poses[scan_id][5],
+            #        self.left_camera_poses[scan_id][6])
 
             # publish tf
             br = tf.TransformBroadcaster()
@@ -145,7 +145,7 @@ class TartanAirData:
 
             # publish msgs
             self.pc2_publisher.publish(pc2)
-            #self.pc2_global_publisher.publish(pc2_global)
+            self.pc2_global_publisher.publish(pc2_global)
 
     def depth_to_pc(self, depth):
         """Transform a depth image into a point cloud with one point for each
